@@ -1,40 +1,49 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import WeatherApi from "./Component/WeatherApi";
 
 export default function Home() {
   const [city, setCity] = useState("");
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
-  const Apikey = "998e9e09cdd7d511f02029f6558ba6d5";
+
+  const API_KEY = "998e9e09cdd7d511f02029f6558ba6d5";
+
   const search = async () => {
-   
+    if (!city.trim()) {
+      setError("Please enter a city name.");
+      return;
+    }
+
     setError("");
-    {
-      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${Apikey}`;
+
+    try {
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`;
       const res = await fetch(url);
       const data = await res.json();
 
       if (data.cod !== 200) {
-        setError("Please enter a valid city name.");
+        setError(" Please enter a valid city name.");
         setData(null);
-        setCity("")
         return;
       }
+
       setData(data);
-      setCity("");
+    } catch (err) {
+      setError(" Error fetching weather data.");
     }
   };
 
+ 
+  useEffect(() => {
+    if (city.trim()) {
+      search();
+    }
+
+  }, [city]); 
   return (
-    <div className="bg-blue-500 h-screen pt-5">
-      <WeatherApi
-        search={search}
-        setCity={setCity}
-        city={city}
-        data={data}
-        error={error}
-      />
+    <div className="bg-blue-500 h-screen flex justify-center items-center">
+      <WeatherApi setCity={setCity} city={city} data={data} error={error} search={search} />
     </div>
   );
 }
